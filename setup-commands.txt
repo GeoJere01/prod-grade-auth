@@ -1,0 +1,28 @@
+SETTING UP NODEJS/TYPESCRIPT PROJECT FOR AUTHENTICATION
+
+1. npm init -y
+
+2. npm i express@4 mongoose dotenv zod bcryptjs cookie-parser jsonwebtoken
+
+3. npm i -D typescript ts-node-dev @types/node @types/express@4 @types/bcryptjs @types/cookie-parser @types/jsonwebtoken
+
+4. {
+    "compilerOptions": {
+        "target" : "ES2019",
+        "module": "commonjs",
+        "rootDir: "src",
+        "outDir": "dist",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true
+    },
+    "include": ["src"]
+}
+
+--> This is for tsconfig.json file, hence create it.
+
+5. "dev": "ts-node-dev --respawn -transpile-only src/server.ts, 
+"build": "tsc",
+"start": "node dist/server.js"
+
+--> this are inserted under scripts in package.json

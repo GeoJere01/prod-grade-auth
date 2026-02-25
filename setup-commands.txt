@@ -21,8 +21,16 @@ SETTING UP NODEJS/TYPESCRIPT PROJECT FOR AUTHENTICATION
 
 --> This is for tsconfig.json file, hence create it.
 
-5. "dev": "ts-node-dev --respawn -transpile-only src/server.ts, 
+5. "dev": "ts-node-dev --respawn --transpile-only src/server.ts, 
 "build": "tsc",
 "start": "node dist/server.js"
 
 --> this are inserted under scripts in package.json
+
+6. Create folder structure
+-- models
+-- routes
+-- controllers
+-- config
+-- lib
+-- middleware

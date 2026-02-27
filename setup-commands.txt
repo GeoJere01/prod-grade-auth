@@ -34,3 +34,13 @@ SETTING UP NODEJS/TYPESCRIPT PROJECT FOR AUTHENTICATION
 -- config
 -- lib
 -- middleware
+
+When starting any backend project think of data modelling or how will the data be talking.
+
+mailtrap.io/home
+
+7. npm i nodemailer
+
+8. npm i -save-dev @types/nodemailer
+
+9. npm install otplib

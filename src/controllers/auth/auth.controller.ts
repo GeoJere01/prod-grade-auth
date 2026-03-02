@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { registerSchema } from "./auth.schema";
 import { User } from "../../models/user.model";
 import bcrypt from "bcryptjs";
+import { hashPassword } from "../../lib/hash";
 
 const registerHandler = async (req: Request, res: Response) => {
   // Validate the data from the user data
@@ -29,8 +30,7 @@ const registerHandler = async (req: Request, res: Response) => {
   }
 
   // If user user is not present, hash the password
-  const salt = await bcrypt.genSalt(10);
-  const passwordHash = await bcrypt.hash(password, salt);
+  const passwordHash = await hashPassword(password);
 
   // Create a newUser
   const newlyCreatedUser = User.create({

@@ -37,5 +37,6 @@ const registerHandler = async (req: Request, res: Response) => {
     email,
     passwordHash,
     isEmailVerified: false,
+    name,
   });
 };

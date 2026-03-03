@@ -7,7 +7,7 @@ import { sendEmail } from "../../lib/email";
 import { createAccessToken, createRefreshToken } from "../../lib/token";
 
 function getAppUrl() {
-  return process.env.APP_URL || `http://localhost:${process.env.PORT}`;
+  return process.env.APP_URL || `http://localhost:${process.env.PORT}/api`;
 }
 
 export const registerHandler = async (req: Request, res: Response) => {
@@ -58,7 +58,7 @@ export const registerHandler = async (req: Request, res: Response) => {
       },
     );
 
-    const verifyUrl = `${getAppUrl}/auth/verify-email?token=${verifyToken}`;
+    const verifyUrl = `${getAppUrl()}/auth/verify-email?token=${verifyToken}`;
 
     await sendEmail(
       newlyCreatedUser.email,
@@ -117,7 +117,7 @@ export const verifyEmailHandler = async (req: Request, res: Response) => {
     await user.save();
 
     return res.json({
-      message: "User is alreeady verified",
+      message: "User is verified",
     });
   } catch (error) {
     console.log(error);
@@ -172,11 +172,11 @@ export const loginHandler = async (req: Request, res: Response) => {
       user.tokenVersion,
     );
 
-    const resfreshToken = createRefreshToken(user.id, user.tokenVersion);
+    const refreshToken = createRefreshToken(user.id, user.tokenVersion);
 
     const isProd = process.env.NODE_ENV === "production";
 
-    res.cookie("refreshToken", resfreshToken, {
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: isProd,
       sameSite: "lax",

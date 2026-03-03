@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
-import { registerSchema } from "./auth.schema";
+import { loginSchema, registerSchema } from "./auth.schema";
 import { User } from "../../models/user.model";
-import { hashPassword } from "../../lib/hash";
+import { checkPassword, hashPassword } from "../../lib/hash";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../../lib/email";
+import { createAccessToken, createRefreshToken } from "../../lib/token";
 
 function getAppUrl() {
   return process.env.APP_URL || `http://localhost:${process.env.PORT}`;
@@ -127,4 +128,77 @@ export const verifyEmailHandler = async (req: Request, res: Response) => {
   }
 };
 
-export const loginHandler = async (req: Request, res: Response) => {};
+export const loginHandler = async (req: Request, res: Response) => {
+  try {
+    const result = loginSchema.safeParse(req.body);
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid input format",
+        error: result.error.flatten,
+      });
+    }
+
+    const { email, password } = result.data;
+
+    const normalisedEmail = email.toLowerCase().trim();
+
+    const user = await User.findOne({ email: normalisedEmail });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "Invalid email!",
+      });
+    }
+
+    const ok = await checkPassword(password, user.passwordHash);
+
+    if (!ok) {
+      return res.status(400).json({
+        message: "Invalid password!",
+      });
+    }
+
+    if (!user.isEmailVerified) {
+      return res.status(403).json({
+        message: "Email not verified! Please verify your email before login",
+      });
+    }
+
+    const accessToken = createAccessToken(
+      user.id,
+      user.role,
+      user.tokenVersion,
+    );
+
+    const resfreshToken = createRefreshToken(user.id, user.tokenVersion);
+
+    const isProd = process.env.NODE_ENV === "production";
+
+    res.cookie("refreshToken", resfreshToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({
+      message: "Login successfully!",
+      accessToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        isEmailVerified: user.isEmailVerified,
+        twoFactorEnabled: user.twoFactorEnabled,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};

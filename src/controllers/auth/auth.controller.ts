@@ -75,5 +75,56 @@ export const registerHandler = async (req: Request, res: Response) => {
         isEmailVerified: newlyCreatedUser.isEmailVerified,
       },
     });
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
 };
+
+export const verifyEmailHandler = async (req: Request, res: Response) => {
+  const token = req.query.token as string | undefined;
+
+  if (!token) {
+    return res.status(400).json({
+      message: "Verification token is missing",
+    });
+  }
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as {
+      id: string;
+    };
+
+    const user = await User.findById(payload.id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found!",
+      });
+    }
+
+    if (user.isEmailVerified) {
+      return res.json({
+        message: "User is already verified",
+      });
+    }
+
+    user.isEmailVerified = true;
+    await user.save();
+
+    return res.json({
+      message: "User is alreeady verified",
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+export const loginHandler = async (req: Request, res: Response) => {};
